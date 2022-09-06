@@ -205,8 +205,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>.\exemplo.s</PathWithFileName>
-      <FilenameWithoutPath>exemplo.s</FilenameWithoutPath>
+      <PathWithFileName>.\startup.s</PathWithFileName>
+      <FilenameWithoutPath>startup.s</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
@@ -217,8 +217,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>.\startup.s</PathWithFileName>
-      <FilenameWithoutPath>startup.s</FilenameWithoutPath>
+      <PathWithFileName>.\main.s</PathWithFileName>
+      <FilenameWithoutPath>main.s</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
@@ -229,8 +229,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>.\carrega_lista.s</PathWithFileName>
-      <FilenameWithoutPath>carrega_lista.s</FilenameWithoutPath>
+      <PathWithFileName>.\funcoes.s</PathWithFileName>
+      <FilenameWithoutPath>funcoes.s</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>

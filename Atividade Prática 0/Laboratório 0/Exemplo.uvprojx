@@ -385,19 +385,19 @@
           <GroupName>Source Group 1</GroupName>
           <Files>
             <File>
-              <FileName>exemplo.s</FileName>
-              <FileType>2</FileType>
-              <FilePath>.\exemplo.s</FilePath>
-            </File>
-            <File>
               <FileName>startup.s</FileName>
               <FileType>2</FileType>
               <FilePath>.\startup.s</FilePath>
             </File>
             <File>
-              <FileName>carrega_lista.s</FileName>
+              <FileName>main.s</FileName>
               <FileType>2</FileType>
-              <FilePath>.\carrega_lista.s</FilePath>
+              <FilePath>.\main.s</FilePath>
+            </File>
+            <File>
+              <FileName>funcoes.s</FileName>
+              <FileType>2</FileType>
+              <FilePath>.\funcoes.s</FilePath>
             </File>
           </Files>
         </Group>
@@ -410,5 +410,15 @@
     <components/>
     <files/>
   </RTE>
+
+  <LayerInfo>
+    <Layers>
+      <Layer>
+        <LayName>Exemplo</LayName>
+        <LayPrjMark>1</LayPrjMark>
+        <LayTitle>Laboratorio_0</LayTitle>
+      </Layer>
+    </Layers>
+  </LayerInfo>
 
 </Project>
