@@ -10,7 +10,6 @@
       <TargetName>Target 1</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
-      <pArmCC>6180000::V6.18::ARMCLANG</pArmCC>
       <pCCUsed>6180000::V6.18::ARMCLANG</pCCUsed>
       <uAC6>9</uAC6>
       <TargetOption>
@@ -50,7 +49,7 @@
             <InvalidFlash>1</InvalidFlash>
           </TargetStatus>
           <OutputDirectory>.\Objects\</OutputDirectory>
-          <OutputName>lab2</OutputName>
+          <OutputName>gpio</OutputName>
           <CreateExecutable>1</CreateExecutable>
           <CreateLib>0</CreateLib>
           <CreateHexFile>0</CreateHexFile>
@@ -135,11 +134,11 @@
             <RunIndependent>0</RunIndependent>
             <UpdateFlashBeforeDebugging>1</UpdateFlashBeforeDebugging>
             <Capability>1</Capability>
-            <DriverSelection>4096</DriverSelection>
+            <DriverSelection>-1</DriverSelection>
           </Flash1>
           <bUseTDR>1</bUseTDR>
           <Flash2>BIN\UL2CM3.DLL</Flash2>
-          <Flash3>"" ()</Flash3>
+          <Flash3></Flash3>
           <Flash4></Flash4>
           <pFcarmOut></pFcarmOut>
           <pFcarmGrp></pFcarmGrp>
@@ -455,6 +454,11 @@
           </GroupOption>
           <Files>
             <File>
+              <FileName>gpio.s</FileName>
+              <FileType>2</FileType>
+              <FilePath>.\gpio.s</FilePath>
+            </File>
+            <File>
               <FileName>main.s</FileName>
               <FileType>2</FileType>
               <FilePath>.\main.s</FilePath>
@@ -469,11 +473,6 @@
               <FileType>2</FileType>
               <FilePath>.\utils.s</FilePath>
             </File>
-            <File>
-              <FileName>lab2.s</FileName>
-              <FileType>2</FileType>
-              <FilePath>.\lab2.s</FilePath>
-            </File>
           </Files>
         </Group>
       </Groups>
@@ -485,15 +484,5 @@
     <components/>
     <files/>
   </RTE>
-
-  <LayerInfo>
-    <Layers>
-      <Layer>
-        <LayName>gpio</LayName>
-        <LayPrjMark>1</LayPrjMark>
-        <LayTitle>lab2</LayTitle>
-      </Layer>
-    </Layers>
-  </LayerInfo>
 
 </Project>

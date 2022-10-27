@@ -22,15 +22,20 @@
 ;<var>	SPACE <tam>                        ; Declara uma variável de nome <var>
                                            ; de <tam> bytes a partir da primeira 
                                            ; posição da RAM	
+
 senha_cofre SPACE 5
-senha_tentativa SPACE 5		
-										
+senha_tentativa SPACE 5
+senha_tentativa_mestre SPACE 5			
+senha_mestre SPACE 5	
+
 ; -------------------------------------------------------------------------------
 ; Área de Código - Tudo abaixo da diretiva a seguir será armazenado na memória de 
 ;                  código
         AREA    |.text|, CODE, READONLY, ALIGN=2
+			
+texto_cofre_mestra			DCB   "1234", 0
 
-	
+
 		; Se alguma função do arquivo for chamada em outro arquivo	
         EXPORT Start                ; Permite chamar a função Start a partir de 
 			                        ; outro arquivo. No caso startup.s
@@ -40,23 +45,40 @@ senha_tentativa SPACE 5
 									; função <func>
 		IMPORT  PLL_Init
 		IMPORT  SysTick_Init
+		IMPORT  SysTick_Wait1ms			
 		IMPORT  GPIO_Init
+        IMPORT  Pisca_LEDs
 		IMPORT  LCD_Init
 		IMPORT	Ler_porta_L
 		IMPORT	Ler_coluna
 		IMPORT	Escrever_string_LCD
 		IMPORT 	Reset_LCD
-		IMPORT 	SysTick_Wait1ms	
-		
+		IMPORT GPIOPortJ_Handler
 		IMPORT Escrever_cofre_travado
 		IMPORT Escrever_cofre_fechado
+		IMPORT Escreve_chave_mestra
 		IMPORT Escrever_cofre_aberto
 		IMPORT Escrever_cofre_abrindo
 		IMPORT Escrever_cofre_fechando
 		IMPORT Escrever_caractere_senha
+
+
 ; -------------------------------------------------------------------------------
 ; Função main()
 Start  		
+	LDR R1, =senha_mestre
+	MOV R11, #0x5E
+	STRB R11, [R1, R10]
+	MOV R10, #1
+	MOV R11, #0x5E
+	STRB R11, [R1, R10]
+	ADD R10, #1
+	MOV R11, #0x5E
+	STRB R11, [R1, R10]
+	ADD R10, #1
+	MOV R11, #0x5E
+	STRB R11, [R1, R10]
+
 	BL PLL_Init                  ;Chama a subrotina para alterar o clock do microcontrolador para 80MHz
 	BL SysTick_Init
 	BL GPIO_Init                 ;Chama a subrotina que inicializa os GPIO
@@ -67,18 +89,25 @@ Start
 	;					2 -> Abrindo
 	;					3 -> Fechando
 	;					4 -> Travado
+	;					5 -> Mestre
 	MOV R9, #0 
 	MOV R8, #0
 	MOV R10, #0
 	MOV R11, #0
+	MOV R7,#0     				;Armazena o estado anterior
+	
+	MOV R6, #50					;Contador
+	MOV R5, #1 					;Alterna os LEDs(Liga/Desliga)
+
 MainLoop
+	CMP R9, #5
+	BEQ Usuario_Mestre
 	CMP R9, #1 ; (R9>1) ? Estado_abrindo_ou_fechando_ou_travado : Estado_aberto_ou_fechado
 	BGT Estado_abrindo_ou_fechando_ou_travado
 Estado_aberto_ou_fechado
 	PUSH { LR }
 	BL Atualizar_teclado
-	POP { LR }
-	B MainLoop
+	POP { LR }	
 Estado_abrindo_ou_fechando_ou_travado
 	CMP R9, #2
 	BEQ Abrindo
@@ -131,15 +160,36 @@ Abrindo
 	B MainLoop
 	
 Travado
-	MOV R0, #500
-	PUSH { LR }
-	BL SysTick_Wait1ms
-	POP { LR }
+	CMP R7, R9
+	BEQ pula_travado
+	MOV R7, R9
 	PUSH { LR }
 	BL Escrever_cofre_travado
 	POP { LR }
+pula_travado
+	PUSH { LR }
+	BL Atualiza_LEDS
+	POP { LR }
+	
 	
 	; To-do: piscar LEDs
+	
+	B MainLoop
+	
+Usuario_Mestre 
+	CMP R7, R9
+	BEQ pula_chave
+	MOV R7, R9
+	PUSH { LR }
+	BL Escreve_chave_mestra
+	POP { LR }
+pula_chave
+	PUSH { LR }
+	BL Atualiza_LEDS
+	POP { LR }
+	PUSH { LR }
+	BL Atualizar_teclado
+	POP { LR }	
 	
 	B MainLoop
 
@@ -200,6 +250,12 @@ alguma_pressionada
 	BEQ Aberto_aguardando_senha
 	CMP R9, #1
 	BEQ Fechado_aguardando_senha
+	CMP R9, #5
+	BEQ Aguardando_chave_mestra
+	B return
+	
+nenhuma_pressionada
+	MOV R11, #0	
 	B return
 	
 Aberto_aguardando_senha
@@ -212,6 +268,12 @@ Fechado_aguardando_senha
 	CMP R10, #4
 	BLT Salvar_novo_digito_tentativa ;Tem menos de 4 digitos salvos? Salva.
 	BEQ Tentar_abrir ;Tem exatamente 4 digitos salvos? Tenta fechar o cofre
+	B return
+	
+Aguardando_chave_mestra	
+	CMP R10, #4
+	BLT Salvar_novo_digito_tentativa ;Tem menos de 4 digitos salvos? Salva.
+	BEQ Tentar_abrir_mestre ;Tem exatamente 4 digitos salvos? Tenta fechar o cofre
 	B return
 
 Salvar_novo_digito_senha
@@ -255,9 +317,23 @@ Salvar_novo_digito_tentativa
 	POP { LR }	
 	B return
 	
+Salvar_novo_digito_mestre
+	CMP R11, #0x77 ;Verifica se o dígito é #
+	ITT EQ
+		MOVEQ R11, #0
+		BEQ return ;Digito é #, então faz leitura de novo dígito 
+	LDR R1, =senha_tentativa_mestre
+	STRB R11, [R1, R10]
+	ADD R10, #1
+	MOV R11, #0
+	PUSH { LR }
+	BL Escrever_caractere_senha
+	POP { LR }	
+	B return
+	
 Tentar_abrir
 	MOV R2, #0
-	LDR R0, =senha_cofre
+	LDR R0, =senha_cofre	
 	LDR R1, =senha_tentativa
 comparar_proximo_digito
 	LDRB R3, [R0, R2]
@@ -268,6 +344,23 @@ comparar_proximo_digito
 	CMP R2, #4
 	BEQ Abrir
 	B comparar_proximo_digito
+	
+Tentar_abrir_mestre
+	MOV R2, #0
+	LDR R0, =senha_mestre
+	LDR R1, =senha_tentativa
+comparar_proximo_digito_mestre
+	LDRB R3, [R0, R2]
+	LDRB R4, [R1, R2]
+	CMP R3, R4
+	BNE Senha_errada_mestre
+	ADD R2, #1
+	CMP R2, #4
+	BEQ Abrir
+	B comparar_proximo_digito_mestre
+
+Senha_errada_mestre
+	B Travar
 	
 Abrir
 	MOV R8, #0; Não foi digitada senha errada nenhuma vez
@@ -296,9 +389,22 @@ Travar
 	MOV R11, #0 ;Zera o valor do caractere lido
 	B return
 
-nenhuma_pressionada
-	MOV R11, #0	
+
+Atualiza_LEDS
+	PUSH { LR }
+	BL Pisca_LEDs
+	POP { LR }
+	SUB R6, #1
+	CMP R6, #0
+	BNE pula
+	MOV R6, #50
+	PUSH { R7 }
+	MOV R7, #-1
+	MUL R5,R7
+	POP { R7 }
+pula 	
 	B return
+
 
 ; -------------------------------------------------------------------------------------------------------------------------
 ; Fim do Arquivo
